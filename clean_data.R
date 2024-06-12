@@ -12,12 +12,12 @@ updated_book_info <- read_excel(paste0(raw_path,
 
 ###################
 
-raw_subset <- tibble(csv_data[, c("Document.Name",
+raw_subset <- tibble(csv_data[, c("Document.Directory",
                                   "Page.Number",
                                   "Region.Area",
                                   "Page.Area")])
 
-head(raw_subset)
+#head(raw_subset)
 
 ###################
 
@@ -50,16 +50,18 @@ table(all_book_info$LangFinal_WALS_VerbInflection)
 ####################
 
 page_data <- raw_subset %>%
-  group_by(Document.Name, Page.Number) %>%
+  group_by(Document.Directory, Page.Number) %>%
   summarize(panel_count = n(),
             panel_size_prop_mean = mean(Region.Area / Page.Area, na.rm=T),
             panel_size_prop_range = max(Region.Area / Page.Area, na.rm=T) -
               min(Region.Area / Page.Area, na.rm=T)) %>%
   ungroup()
 
-full_page_data <- merge(page_data, book_info, by="Document.Name", all.x=TRUE)
+full_page_data <- merge(page_data,
+                        all_book_info,
+                        by="Document.Directory", all.x=TRUE)
 
-head(full_page_data)
+#head(full_page_data)
 
 write.csv(full_page_data,
           paste0(clean_path,
@@ -69,7 +71,7 @@ write.csv(full_page_data,
 ####################
 
 book_data <- page_data %>%
-  group_by(Document.Name) %>%
+  group_by(Document.Directory) %>%
   summarize(panels_per_page_mean = mean(panel_count),
             panels_per_page_range = max(panel_count) - min(panel_count),
             panel_size_prop_mean_page_mean = mean(panel_size_prop_mean),
@@ -78,9 +80,10 @@ book_data <- page_data %>%
   ungroup()
 
 
-full_book_data <- merge(book_data, book_info, by="Document.Name", all.x=TRUE)
+full_book_data <- merge(book_data, all_book_info,
+                        by="Document.Directory", all.x=TRUE)
 
-head(full_book_data)
+#head(full_book_data)
 
 write.csv(full_book_data,
           paste0(clean_path,
