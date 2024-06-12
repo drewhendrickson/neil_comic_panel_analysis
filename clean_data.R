@@ -22,15 +22,30 @@ head(raw_subset)
 ###################
 
 
-book_info <- tibble(unique(csv_data[, c("Document.Name",
-                                 "StyleCluster",
-                                 "LangFinal_WordStructureRaw",
-                                 "LangFinal_WALS_VerbInflection",
-                                 "Publication.Date",
-                                 "RegionSimplified")]))
+old_book_info <- tibble(unique(csv_data[, c("Document.Directory",
+                                            "StyleCluster",
+                                            "LangFinal_WordStructureRaw",
+                                            "LangFinal_WALS_VerbInflection",
+                                            "Publication.Date",
+                                            "RegionSimplified")]))
 
-head(book_info)
-tail(book_info)
+
+book_info <- tibble(updated_book_info[, c("Document Directory",
+                                          "StyleBroad")])
+
+all_book_info <- merge(book_info, old_book_info,
+                       by.x = "Document Directory",
+                       by.y = "Document.Directory",
+                       all = T)
+
+str(all_book_info)
+
+table(all_book_info$StyleBroad)
+table(all_book_info$Publication.Date)
+table(all_book_info$RegionSimplified)
+
+table(all_book_info$LangFinal_WordStructureRaw)
+table(all_book_info$LangFinal_WALS_VerbInflection)
 
 ####################
 
