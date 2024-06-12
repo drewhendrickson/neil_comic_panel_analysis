@@ -7,9 +7,8 @@ source("paths.R")
 csv_data <- read.csv(paste0(raw_path,
                             "TINTIN_Panels_021324_All.csv"))
 
-head(csv_data)
-
-table(csv_data$Style, csv_data$StyleCluster)
+updated_book_info <- read_excel(paste0(raw_path,
+                                       "TINTINCorpus_BiblioList_Final.xlsx"))
 
 ###################
 
