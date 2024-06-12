@@ -33,10 +33,16 @@ old_book_info <- tibble(unique(csv_data[, c("Document.Directory",
 book_info <- tibble(updated_book_info[, c("Document Directory",
                                           "StyleBroad")])
 
-all_book_info <- merge(book_info, old_book_info,
-                       by.x = "Document Directory",
-                       by.y = "Document.Directory",
+all_book_info <- merge(old_book_info, book_info,
+                       by.x = "Document.Directory",
+                       by.y = "Document Directory",
                        all = T)
+
+
+rm(book_info, old_book_info)
+
+#######################
+# check values
 
 str(all_book_info)
 
