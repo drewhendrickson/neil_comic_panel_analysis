@@ -6,3 +6,4 @@ Code to analyze comics panels per page and panel size
 
 - clean_data.R : read raw data and produce data about books (book_data.csv) and pages (page_data.csv)
 
+- page_summary_stats.R : generate simple visualizations of panels per page and size of panels
