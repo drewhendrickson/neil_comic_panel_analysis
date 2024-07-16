@@ -23,7 +23,7 @@ raw_subset <- tibble(csv_data[, c("Document.Directory",
 
 
 old_book_info <- tibble(unique(csv_data[, c("Document.Directory",
-                                            "StyleCluster",
+#                                            "StyleCluster",
                                             "LangFinal_WordStructureRaw",
                                             "LangFinal_WALS_VerbInflection",
                                             "Publication.Date",
@@ -42,16 +42,30 @@ all_book_info <- merge(old_book_info, book_info,
 rm(book_info, old_book_info)
 
 #######################
-# check values
+# check and clean values
 
 str(all_book_info)
 
-table(all_book_info$StyleBroad)
 table(all_book_info$Publication.Date)
+
+table(all_book_info$StyleBroad)
 table(all_book_info$RegionSimplified)
 
 table(all_book_info$LangFinal_WordStructureRaw)
+
+all_book_info$LangFinal_WordStructureRaw[all_book_info$LangFinal_WordStructureRaw == ""] <- NA
+all_book_info$LangFinal_WordStructureRaw[all_book_info$LangFinal_WordStructureRaw == "#N/A"] <- NA
+
+table(all_book_info$LangFinal_WordStructureRaw)
+sum(is.na(all_book_info$LangFinal_WordStructureRaw))
+
 table(all_book_info$LangFinal_WALS_VerbInflection)
+
+all_book_info$LangFinal_WALS_VerbInflection[all_book_info$LangFinal_WALS_VerbInflection == ""] <- NA
+all_book_info$LangFinal_WALS_VerbInflection[all_book_info$LangFinal_WALS_VerbInflection == "#N/A"] <- NA
+
+table(all_book_info$LangFinal_WALS_VerbInflection)
+sum(is.na(all_book_info$LangFinal_WALS_VerbInflection))
 
 ####################
 
@@ -67,7 +81,7 @@ full_page_data <- merge(page_data,
                         all_book_info,
                         by="Document.Directory", all.x=TRUE)
 
-#head(full_page_data)
+head(full_page_data)
 
 write.csv(full_page_data,
           paste0(clean_path,
@@ -89,7 +103,7 @@ book_data <- page_data %>%
 full_book_data <- merge(book_data, all_book_info,
                         by="Document.Directory", all.x=TRUE)
 
-#head(full_book_data)
+head(full_book_data)
 
 write.csv(full_book_data,
           paste0(clean_path,
