@@ -53,6 +53,22 @@ str(data)
 
 ```
 
+# Inspect the data
+
+
+### Region by Style
+
+Unfortunately some Styles are only in a few Regions, this makes the interaction hard to model.
+
+```{r }
+
+pander( table(data$RegionSimplified, data$StyleBroad) )
+
+```
+
+
+
+
 # Now, we look at model comparisons
 
 ## Effect of style
