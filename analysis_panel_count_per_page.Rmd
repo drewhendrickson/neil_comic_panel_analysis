@@ -91,6 +91,8 @@ pander( anova(alt_model, full_model) )
 
 ```
 
+## Effect of style with interactions
+
 What is the effect of style when added to a model with all other factors AND 5 interactions:
 
 - Style and Word Structure 
@@ -125,7 +127,7 @@ alt_model <- lmer(panel_count ~ RegionSimplified +
                     RegionSimplified : LangFinal_WALS_VerbInflection +
                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
                     Year + 
-                   (1 | DocumentID),
+                    (1 | DocumentID),
                   data = data)
 
 
@@ -148,6 +150,52 @@ alt_model <- lmer(panel_count ~ StyleBroad +
                     Year + LangFinal_WordStructureRaw + 
                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
                   data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+
+## Effect of region with interactions
+
+What is the effect of region when added to a model with all other factors AND 5 interactions:
+
+- Style and Word Structure 
+- Style and Verb Inflection 
+- Region and Word Structure 
+- Region and Verb Inflection 
+- Word Structure and Verb Inflection
+
+
+```{r style_analysis_with_interactions}
+
+full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                     # StyleBroad : RegionSimplified + 
+                     LangFinal_WordStructureRaw + 
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection + 
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year + 
+                     (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(panel_count ~ StyleBroad + 
+                    # StyleBroad : RegionSimplified + 
+                    LangFinal_WordStructureRaw + 
+                    StyleBroad : LangFinal_WordStructureRaw +
+                    RegionSimplified : LangFinal_WordStructureRaw +
+                    LangFinal_WALS_VerbInflection + 
+                    StyleBroad : LangFinal_WALS_VerbInflection +
+                    RegionSimplified : LangFinal_WALS_VerbInflection +
+                    LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                    Year + 
+                    (1 | DocumentID),
+                  data = data)
+
 
 pander( anova(alt_model, full_model) )
 
