@@ -1,0 +1,349 @@
+---
+title: "Panel Count vs Size by Page"
+author: "Drew Hendrickson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Measure the effect of predictors on Page Count (per Page)
+
+### First, read, clean, and select the data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+
+library(tidyverse)
+library(lme4)
+library(pander)
+
+```
+
+
+
+
+```{r read_and_format_data}
+
+
+
+source("paths.R")
+
+data <- read_csv(paste0(clean_path, "page_data.csv"))
+
+data$DocumentID <- factor(data$Document.Directory)
+data$RegionSimplified <- factor(data$RegionSimplified)
+data$StyleBroad <- factor(data$StyleBroad)
+data$Page <- factor(data$Page.Number)
+data$Year <- factor(data$Publication.Date)
+
+```
+
+```{r select_vars}
+
+data <- data %>%
+  select(panel_count, panel_size_prop_mean,
+         Year, RegionSimplified, StyleBroad,
+         LangFinal_WordStructureRaw,
+         LangFinal_WALS_VerbInflection,
+         DocumentID, Page)
+
+str(data)
+
+```
+
+# Data Inspection
+
+```{r panel_count_by_size_plot}
+
+ggplot(data,
+       aes(x = panel_size_prop_mean,
+           y = panel_count)) +
+  geom_point(alpha=0.5) +
+  theme_bw()
+
+
+
+```
+
+## log transform measures and drop original
+
+```{r add_log_transformations}
+
+
+data$log_panel_size <- log(data$panel_size_prop_mean, 10)
+data$log_panel_count <- log(data$panel_count, 10)
+
+data <- data %>%
+  select(-panel_size_prop_mean, -panel_count)
+
+str(data)
+```
+
+## relationship between log(panel size) and log(panel count)
+
+```{r log_plot}
+
+ggplot(data,
+       aes(x = log_panel_size,
+           y = log_panel_count)) +
+  geom_point(alpha=0.5) +
+  theme_bw()
+
+```
+
+
+
+# Checking effect of interaction between panel size and various variables
+
+## Effect of interaction between log(panel_size) and style
+
+What is the effect of the interaction between log(panel_size) and style when added to a model with all other factors AND interactions:
+
+- Style and Word Structure 
+- Style and Verb Inflection 
+- Region and Word Structure 
+- Region and Verb Inflection 
+- Word Structure and Verb Inflection
+- Region and log(panel size)
+- Word Structure and log(panel size)
+- Verb Inflection and log(panel size)
+
+```{r style_size_interaction_effect}
+
+
+
+full_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+
+
+alt_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     #StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+
+## Effect of interaction between log(panel_size) and region
+
+What is the effect of the interaction between log(panel_size) and region when added to a model with all other factors AND interactions:
+
+- Style and Word Structure 
+- Style and Verb Inflection 
+- Style and log(panel size)
+- Region and Word Structure 
+- Region and Verb Inflection 
+- Word Structure and Verb Inflection
+- Word Structure and log(panel size)
+- Verb Inflection and log(panel size)
+
+```{r region_size_interaction_effect}
+
+
+
+full_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+
+
+alt_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     #RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+
+
+## Effect of interaction between log(panel_size) and Word Structure
+
+What is the effect of the interaction between log(panel_size) and Word Structure when added to a model with all other factors AND interactions:
+
+- Style and Word Structure 
+- Style and Verb Inflection 
+- Style and log(panel size)
+- Region and Word Structure 
+- Region and Verb Inflection 
+- Region and log(panel size)
+- Word Structure and Verb Inflection
+- Verb Inflection and log(panel size)
+
+```{r structure_size_interaction_effect}
+
+
+
+full_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+
+
+alt_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     #log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+## Effect of interaction between log(panel_size) and Verb Inflection
+
+What is the effect of the interaction between log(panel_size) and Verb Inflection when added to a model with all other factors AND interactions:
+
+- Style and Word Structure 
+- Style and Verb Inflection 
+- Style and log(panel size)
+- Region and Word Structure 
+- Region and Verb Inflection 
+- Region and log(panel size)
+- Word Structure and Verb Inflection
+- Word Structure and log(panel size)
+
+```{r inflection_size_interaction_effect}
+
+
+
+full_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+
+
+alt_model <- lmer(log_panel_count ~ log_panel_size +
+                     StyleBroad +
+                     StyleBroad : log_panel_size +
+                     RegionSimplified +
+                     RegionSimplified : log_panel_size +
+                     # StyleBroad : RegionSimplified +
+                     LangFinal_WordStructureRaw +
+                     log_panel_size : LangFinal_WordStructureRaw +
+                     StyleBroad : LangFinal_WordStructureRaw +
+                     RegionSimplified : LangFinal_WordStructureRaw +
+                     LangFinal_WALS_VerbInflection +
+                     #log_panel_size : LangFinal_WALS_VerbInflection +
+                     StyleBroad : LangFinal_WALS_VerbInflection +
+                     RegionSimplified : LangFinal_WALS_VerbInflection +
+                     LangFinal_WordStructureRaw : LangFinal_WALS_VerbInflection +
+                     Year +
+                     (1 | DocumentID),
+                   data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
