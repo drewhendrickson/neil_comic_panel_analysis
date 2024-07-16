@@ -7,10 +7,12 @@ source("paths.R")
 page_data <- read.csv(paste0(clean_path,
                              "page_data.csv"))
 
+page_data$StyleCluster <- factor(page_data$StyleCluster)
+
+
 
 
 page_data$Document.Directory <- factor(page_data$Document.Directory)
-page_data$StyleCluster <- factor(page_data$StyleCluster)
 #page_data$BookOriginalLanguage <- factor(page_data$BookOriginalLanguage)
 page_data$RegionSimplified <- factor(page_data$RegionSimplified)
 
@@ -18,6 +20,13 @@ page_data$Publication.Date <- factor(page_data$Publication.Date)
 
 
 str(page_data)
+
+########################
+# inspect styleCluster variable
+
+table(table(page_data$StyleCluster))
+
+
 
 ################
 # number of panels
