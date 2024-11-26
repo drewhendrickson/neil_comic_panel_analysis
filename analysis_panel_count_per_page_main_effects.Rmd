@@ -1,0 +1,132 @@
+---
+title: "Main effects of Region and Style on Panel Count by Page"
+author: "Drew Hendrickson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+### First, read, clean, and select the data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+
+library(tidyverse)
+library(lme4)
+library(pander)
+library(ggplot2)
+
+```
+
+
+
+
+```{r read_and_format_data}
+
+
+
+source("paths.R")
+
+data <- read_csv(paste0(clean_path, "page_data.csv"))
+
+data$DocumentID <- factor(data$Document.Directory)
+data$RegionSimplified <- factor(data$RegionSimplified)
+data$StyleBroad <- factor(data$StyleBroad)
+data$Page <- factor(data$Page.Number)
+data$Year <- factor(data$Publication.Date)
+
+```
+
+```{r select_vars}
+
+data <- data %>%
+  select(panel_count, 
+         Year, RegionSimplified, StyleBroad,
+         LangFinal_WordStructureRaw,
+         LangFinal_WALS_VerbInflection,
+         DocumentID, Page)
+
+str(data)
+
+```
+
+# Now, we look at model comparisons
+
+
+## Effect of Region
+
+Is there a main effect of region compared to the full model without interactions?
+
+```{r region_analysis}
+
+full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(panel_count ~ StyleBroad + 
+                    Year + LangFinal_WordStructureRaw + 
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+## Plot of the effect of Region
+
+
+```{r plot-region}
+
+ggplot(data,
+       aes(x = RegionSimplified, 
+           y = panel_count)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Region",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  
+
+```
+
+## Effect of Style
+
+Is there a main effect of style compared to the full model without interactions?
+
+```{r style_analysis}
+
+full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(panel_count ~ RegionSimplified + 
+                    Year + LangFinal_WordStructureRaw + 
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+## Plot of the effect of Style
+
+
+```{r plot-style}
+
+ggplot(data,
+       aes(x = StyleBroad, 
+           y = panel_count)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Style",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  
+
+```
