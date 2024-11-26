@@ -85,7 +85,7 @@ pander( table(data$RegionSimplified, data$StyleBroad) )
 
 Is there an interaction between style and region when added to a model with all other factors
 
-```{r style_analysis}
+```{r interaction_analysis}
 
 full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
                      StyleBroad : RegionSimplified + 
@@ -120,32 +120,4 @@ ggplot(data,
         axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   
 
-```
-
-## For reference, the plots of each factor
-
-```{r plot-region}
-
-ggplot(data,
-       aes(x = RegionSimplified, 
-           y = panel_count)) +
-  geom_boxplot() +
-  theme_bw() +
-  labs(x = "Region",
-       y = "Panels per Page") +
-  theme(legend.position="top",
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
-```
-
-```{r plot-stype}
-
-ggplot(data,
-       aes(x = StyleBroad, 
-           y = panel_count)) +
-  geom_boxplot() +
-  theme_bw() +
-  labs(x = "Style",
-       y = "Panels per Page") +
-  theme(legend.position="top",
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
