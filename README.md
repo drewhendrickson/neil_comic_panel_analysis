@@ -1,4 +1,4 @@
-# neil_comic_panel_analysis
+# neil comic panel analysis
 
 Code to analyze comics panels per page and panel size
 
@@ -22,7 +22,7 @@ Run repeated measures analyses to evaluate the effect of various factors (includ
 
 Run repeated measures analyses to evaluate the effect of various factors (including style, region, year, and linguistic features) and the two-way interations of those factors on the average size of panels per page.
 
-### nalysis_panel_count_and_size.Rmd 
+### analysis_panel_count_and_size.Rmd 
 
 Run repeated measures analyses to evaluate the interaction of size of panels and various factors (including style, region, and linguistic features) on the number of panels per page.
 
