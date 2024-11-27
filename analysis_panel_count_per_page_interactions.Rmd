@@ -17,6 +17,8 @@ library(tidyverse)
 library(lme4)
 library(pander)
 library(ggplot2)
+library(emmeans)
+
 
 ```
 
@@ -101,6 +103,16 @@ alt_model <- lmer(panel_count ~ StyleBroad + RegionSimplified +
 pander( anova(alt_model, full_model) )
 
 ```
+### Post-hoc comparisons
+
+```{r post-hoc-interaction-effects}
+
+EMM <- emmeans(full_model, ~ StyleBroad * RegionSimplified, pbkrtest.limit = 14000)
+results <- test(pairs(EMM, by = "RegionSimplified"), by = NULL, adjust = "mvt")
+
+results[results$p.value < 0.4,]
+
+```
 
 ## Plot of the interaction
 
@@ -116,6 +128,26 @@ ggplot(data,
   labs(x = "Region",
        y = "Panels per Page",
        fill = "Style") +
+  theme(legend.position="top",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  
+
+```
+
+## Plot of the interaction grouped the other way
+
+
+```{r plot-interaction-2}
+
+ggplot(data,
+       aes(x = StyleBroad, 
+           y = panel_count,
+           fill = RegionSimplified)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Style",
+       y = "Panels per Page",
+       fill = "Region") +
   theme(legend.position="top",
         axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   
