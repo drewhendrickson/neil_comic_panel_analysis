@@ -17,6 +17,8 @@ library(tidyverse)
 library(lme4)
 library(pander)
 library(ggplot2)
+library(emmeans)
+
 
 ```
 
@@ -74,6 +76,24 @@ alt_model <- lmer(panel_count ~ StyleBroad +
 pander( anova(alt_model, full_model) )
 
 ```
+
+
+```{r post-hoc-region-analysis}
+
+#emmeans(full_model, "RegionSimplified", pbkrtest.limit = 14000)
+
+
+results <- emmeans(full_model,
+        list(pairwise ~ RegionSimplified),
+        adjust = "tukey",
+        pbkrtest.limit = 14000)
+
+results <- as.data.frame(results$`pairwise differences of RegionSimplified`)
+
+results[results$p.value < 0.1,]
+
+```
+
 ## Plot of the effect of Region
 
 
@@ -112,6 +132,20 @@ alt_model <- lmer(panel_count ~ RegionSimplified +
 pander( anova(alt_model, full_model) )
 
 ```
+
+```{r post-hoc-style-analysis}
+
+results <- emmeans(full_model,
+        list(pairwise ~ StyleBroad),
+        adjust = "tukey",
+        pbkrtest.limit = 14000)
+
+results <- as.data.frame(results$`pairwise differences of StyleBroad`)
+
+results[results$p.value < 0.1,]
+
+```
+
 ## Plot of the effect of Style
 
 
