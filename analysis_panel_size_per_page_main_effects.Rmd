@@ -1,0 +1,265 @@
+---
+title: "Main effects of Region and Style on Average Panel Size per Page"
+author: "Drew Hendrickson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+### First, read, clean, and select the data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+
+library(tidyverse)
+library(lme4)
+library(pander)
+library(ggplot2)
+library(emmeans)
+
+
+```
+
+
+
+
+```{r read_and_format_data}
+
+
+
+source("paths.R")
+
+data <- read_csv(paste0(clean_path, "page_data.csv"))
+
+data$DocumentID <- factor(data$Document.Directory)
+data$RegionSimplified <- factor(data$RegionSimplified)
+data$StyleBroad <- factor(data$StyleBroad)
+data$Page <- factor(data$Page.Number)
+data$Year <- factor(data$Publication.Date)
+
+```
+
+```{r select_vars}
+
+data <- data %>%
+  select(panel_size_prop_mean, 
+         Year, RegionSimplified, StyleBroad,
+         LangFinal_WordStructureRaw,
+         LangFinal_WALS_VerbInflection,
+         DocumentID, Page)
+
+str(data)
+
+```
+
+# Now, we look at model comparisons
+
+
+## Effect of Region
+
+Is there a main effect of region compared to the full model without interactions?
+
+```{r region_analysis}
+
+full_model <- lmer(panel_size_prop_mean ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(panel_size_prop_mean ~ StyleBroad + 
+                    Year + LangFinal_WordStructureRaw + 
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+```{r post-hoc-region-analysis}
+
+#emmeans(full_model, "RegionSimplified", pbkrtest.limit = 14000)
+
+
+results <- emmeans(full_model,
+        list(pairwise ~ RegionSimplified),
+        adjust = "tukey",
+        pbkrtest.limit = 14000)
+
+results <- as.data.frame(results$`pairwise differences of RegionSimplified`)
+
+results[results$p.value < 0.1,]
+
+```
+
+## Plot of the effect of Region
+
+
+```{r plot-region}
+
+ggplot(data,
+       aes(x = RegionSimplified, 
+           y = panel_size_prop_mean)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Region",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  
+
+```
+
+## Effect of Style
+
+Is there a main effect of style compared to the full model without interactions?
+
+```{r style_analysis}
+
+full_model <- lmer(panel_size_prop_mean ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(panel_size_prop_mean ~ RegionSimplified + 
+                    Year + LangFinal_WordStructureRaw + 
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+```{r post-hoc-style-analysis}
+
+results <- emmeans(full_model,
+        list(pairwise ~ StyleBroad),
+        adjust = "tukey",
+        pbkrtest.limit = 14000)
+
+results <- as.data.frame(results$`pairwise differences of StyleBroad`)
+
+results[results$p.value < 0.1,]
+
+```
+
+## Plot of the effect of Style
+
+
+```{r plot-style}
+
+ggplot(data,
+       aes(x = StyleBroad, 
+           y = panel_size_prop_mean)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(x = "Style",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top",
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  
+
+```
+
+
+
+############
+
+
+## Effect of Word Structure
+
+Is there a main effect of word structure compared to the full model without interactions?
+
+```{r word_structure_analysis}
+
+full_data <- data[!is.na(data$LangFinal_WordStructureRaw),]
+
+print(paste0("Dropped ", sum(is.na(data$LangFinal_WordStructureRaw)),
+      " rows from the full dataset with ", nrow(data)))
+
+full_model <- lmer(panel_size_prop_mean ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = full_data)
+
+alt_model <- lmer(panel_size_prop_mean ~ StyleBroad + RegionSimplified + 
+                    Year +  
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = full_data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+## Plot of the effect of Word Structure
+
+
+```{r plot-word-structure}
+
+ggplot(data,
+       aes(x = LangFinal_WordStructureRaw, 
+           y = panel_size_prop_mean)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method='lm') + 
+  theme_bw() +
+  labs(x = "Word Structure Score",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top")
+  
+
+```
+
+
+############
+
+
+## Effect of Verb Inflection
+
+Is there a main effect of verb inflection compared to the full model without interactions?
+
+```{r verb_inflection_analysis}
+
+full_data <- data[!is.na(data$LangFinal_WALS_VerbInflection),]
+
+print(paste0("Dropped ", sum(is.na(data$LangFinal_WALS_VerbInflection)),
+      " rows from the full dataset with ", nrow(data)))
+
+full_model <- lmer(panel_size_prop_mean ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = full_data)
+
+alt_model <- lmer(panel_size_prop_mean ~ StyleBroad + RegionSimplified + 
+                    Year + LangFinal_WordStructureRaw + (1 | DocumentID),
+                  data = full_data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+## Plot of the effect of Verb Inflection
+
+
+```{r plot-verb-inflection}
+
+ggplot(data,
+       aes(x = LangFinal_WALS_VerbInflection, 
+           y = panel_size_prop_mean)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method='lm') + 
+  theme_bw() +
+  labs(x = "Verb Inflection Score",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top")
+  
+
+```
+
