@@ -164,3 +164,102 @@ ggplot(data,
   
 
 ```
+
+
+
+############
+
+
+## Effect of Word Structure
+
+Is there a main effect of word structure compared to the full model without interactions?
+
+```{r word_structure_analysis}
+
+full_data <- data[!is.na(data$LangFinal_WordStructureRaw),]
+
+print(paste0("Dropped ", sum(is.na(data$LangFinal_WordStructureRaw)),
+      " rows from the full dataset with ", nrow(data)))
+
+full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = full_data)
+
+alt_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                    Year +  
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = full_data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+## Plot of the effect of Word Structure
+
+
+```{r plot-word-structure}
+
+ggplot(data,
+       aes(x = LangFinal_WordStructureRaw, 
+           y = panel_count)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method='lm') + 
+  theme_bw() +
+  labs(x = "Word Structure Score",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top")
+  
+
+```
+
+
+############
+
+
+## Effect of Verb Inflection
+
+Is there a main effect of verb inflection compared to the full model without interactions?
+
+```{r verb_inflection_analysis}
+
+full_data <- data[!is.na(data$LangFinal_WALS_VerbInflection),]
+
+print(paste0("Dropped ", sum(is.na(data$LangFinal_WALS_VerbInflection)),
+      " rows from the full dataset with ", nrow(data)))
+
+full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = full_data)
+
+alt_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                    Year + LangFinal_WordStructureRaw + (1 | DocumentID),
+                  data = full_data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+
+## Plot of the effect of Verb Inflection
+
+
+```{r plot-verb-inflection}
+
+ggplot(data,
+       aes(x = LangFinal_WALS_VerbInflection, 
+           y = panel_count)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method='lm') + 
+  theme_bw() +
+  labs(x = "Verb Inflection Score",
+       y = "Panels per Page",
+       fill = "Style") +
+  theme(legend.position="top")
+  
+
+```
+
