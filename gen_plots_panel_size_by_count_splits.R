@@ -13,7 +13,7 @@ data$Page <- factor(data$Page.Number)
 data$Year <- factor(data$Publication.Date)
 
 # compute Decade
-data$Decade <- factor(floor(data$Year / 10) * 10)
+data$Decade <- factor(floor(data$Publication.Date / 10) * 10)
 
 
 ########################
