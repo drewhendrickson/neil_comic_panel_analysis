@@ -57,6 +57,43 @@ str(data)
 # Now, we look at model comparisons
 
 
+## Effect of Year
+
+Is there a main effect of year compared to the full model without interactions?
+
+```{r year_analysis}
+
+full_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                     Year + LangFinal_WordStructureRaw + 
+                     LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(panel_count ~ StyleBroad + RegionSimplified + 
+                    LangFinal_WordStructureRaw + 
+                    LangFinal_WALS_VerbInflection + (1 | DocumentID),
+                  data = data)
+
+pander( anova(alt_model, full_model) )
+
+```
+
+```{r post-hoc-year-analysis}
+
+#emmeans(full_model, "RegionSimplified", pbkrtest.limit = 14000)
+
+
+results <- emmeans(full_model,
+        list(pairwise ~ Year),
+        adjust = "tukey",
+        pbkrtest.limit = 14000)
+
+results <- as.data.frame(results$`pairwise differences of Year`)
+
+results[results$p.value < 0.1,]
+
+```
+
+
 ## Effect of Region
 
 Is there a main effect of region compared to the full model without interactions?

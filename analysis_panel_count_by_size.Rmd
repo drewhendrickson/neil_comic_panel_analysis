@@ -1,0 +1,131 @@
+---
+title: "Relationship between Panel Count by Panel Size"
+author: "Drew Hendrickson"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+### First, read, clean, and select the data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries}
+
+library(tidyverse)
+library(lme4)
+library(pander)
+library(ggplot2)
+library(emmeans)
+library(MuMIn)
+
+
+```
+
+
+
+
+```{r read_and_format_data}
+
+
+
+source("paths.R")
+
+data <- read_csv(paste0(clean_path, "page_data.csv"))
+
+data$DocumentID <- factor(data$Document.Directory)
+data$RegionSimplified <- factor(data$RegionSimplified)
+data$StyleBroad <- factor(data$StyleBroad)
+data$Page <- factor(data$Page.Number)
+data$Year <- factor(data$Publication.Date)
+
+####################
+# add log features
+
+data$log_panel_count = log(data$panel_count)
+data$log_panel_size = log(100 * data$panel_size_prop_mean)
+
+
+```
+
+```{r select_vars}
+
+data <- data %>%
+  select(log_panel_count, log_panel_size,
+         Year, RegionSimplified, StyleBroad,
+         LangFinal_WordStructureRaw,
+         LangFinal_WALS_VerbInflection,
+         DocumentID, Page)
+
+str(data)
+
+```
+
+# Now, we look at model comparisons
+
+
+## Full model comparison
+
+
+```{r define_full_models}
+
+full_model <- lmer(log_panel_count ~ log_panel_size + 
+                     StyleBroad + RegionSimplified + 
+                     Year + (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(log_panel_count ~  
+                     StyleBroad + RegionSimplified + 
+                     Year + (1 | DocumentID),
+                   data = data)
+
+```
+
+### Does adding panel size to the full model provide a better fit?
+
+```{r alt_full_compare_models}
+
+pander( anova(alt_model, full_model) )
+
+
+```
+```{r calc_r_2_full}
+
+r.squaredGLMM(full_model)
+
+```
+
+
+### Does adding panel size to a null model provide a better fit?
+
+```{r define_min_models}
+
+full_model <- lmer(log_panel_count ~ log_panel_size + 
+                    (1 | DocumentID),
+                   data = data)
+
+alt_model <- lmer(log_panel_count ~ 1 + (1 | DocumentID),
+                   data = data)
+
+
+```
+
+
+```{r null_compare_models}
+
+pander( anova(alt_model, full_model) )
+
+
+```
+
+
+
+```{r calc_r_2_min}
+
+r.squaredGLMM(full_model)
+
+
+```
+
+
