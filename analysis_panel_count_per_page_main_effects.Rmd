@@ -89,7 +89,7 @@ results <- emmeans(full_model,
 
 results <- as.data.frame(results$`pairwise differences of Year`)
 
-results[results$p.value < 0.1,]
+results[results$p.value < 0.05,]
 
 ```
 
@@ -179,9 +179,11 @@ results <- emmeans(full_model,
 
 results <- as.data.frame(results$`pairwise differences of StyleBroad`)
 
-results[results$p.value < 0.1,]
+results[results$p.value < 0.2,]
 
 ```
+
+
 
 ## Plot of the effect of Style
 
